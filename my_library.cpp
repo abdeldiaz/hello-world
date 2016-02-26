@@ -250,5 +250,38 @@ int anagramatic_pair_count(string str){
 	return pairCount;
 }
 
+int index_to_remove(string str){
+    int n = str.length();
+	int i = 0;
+	int j = n-1;
 
+    while (i < j){
+        if ( str[i] == str[j] ){
+            j--;
+            i++;
+        }
+        else{
+            break;
+        }
+    }
+    
+    if(i >= j){
+        return -1;
+    }
+    
+    int l_out = i;
+    int r_out = j;
+    
+    i++;
+    while (i < j){
+        if ( str[i] == str[j] ){
+            j--;
+            i++;
+        }
+        else{
+            return r_out;
+        }
+    }
+	return l_out;
+}
 

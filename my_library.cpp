@@ -285,3 +285,59 @@ int index_to_remove(string str){
 	return l_out;
 }
 
+bool is_palindrome(string str){
+    int n = str.length();
+	int i = 0;
+	int j = n-1;
+
+    while (i < j){
+        if ( str[i] == str[j] ){
+            j--;
+            i++;
+        }
+        else{
+            break;
+        }
+    }
+	return (i>=j)?true:false;
+}
+
+string small_lexicographic_A (string S){
+	if (S.empty()) return "";
+
+	int count_chr[26];
+	int needed_chr[26];
+	string A;
+
+	for(int i = 0; i < 26; count_chr[i] = 0, i++);
+	for(int i = 0; i < 26; needed_chr[i] = 0, i++);
+	for (int i = 0; i < (int)S.length(); count_chr[S[i]-'a'] ++, i++);
+	for(int i = 0; i < 26; needed_chr[i] = count_chr[i]/2, i++);
+
+	reverse(S.begin(), S.end());
+
+	int index = 0, pos = -1;
+	while (A.length() < S.length() / 2) {
+		pos = -1;
+		while (true) {
+			char chr = S[index];
+			if ((needed_chr[chr - 'a'] > 0) && (pos < 0 || chr < S[pos]))
+				pos = index;
+			count_chr[chr - 'a']--;
+			if (count_chr[chr - 'a'] < needed_chr[chr - 'a'])
+				break;
+			index++;
+		}
+
+		for (int j = pos + 1; j < index + 1; j++)
+			count_chr[S[j] - 'a']++;
+
+		needed_chr[S[pos] - 'a']--;
+		A.push_back(S[pos]);
+
+		index = pos + 1;
+
+	}
+
+	return A;
+}

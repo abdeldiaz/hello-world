@@ -341,3 +341,76 @@ string small_lexicographic_A (string S){
 
 	return A;
 }
+
+int index_to_convert_to_palindrome(string str){
+    int n = str.length();
+	int i = 0;
+	int j = n-1;
+    int index = 0;
+    
+    while (i < j){
+    	if ( str[i] == str[j] ){
+    		j--;
+    		i++;
+        }
+        else{
+        	char chr1 = str[i]
+        	char chr2 = str[j];
+			if (chr1 < chr2) {
+				while (chr1 < chr2 && chr2 > 'a') {
+					chr2--;
+					index++;
+				}
+			} else {
+				while (chr1 > chr2 && chr1 > 'a') {
+					chr1--;
+					index++;
+				}
+			}
+			j--;
+			i++;
+        }
+    }
+    return index;
+}
+
+int maximun_children_length (string str1, string str2){
+	string s;
+	vector<int> pos1;
+	vector<int> pos2;
+
+	if (str1.length() != str2.length()){
+		return 0;
+	}
+
+	for(int i = 0; i < (int)str2.length(); i++){
+
+		if( str1.find(str2[i]) != string::npos ){
+			int pos_in_1 = std::distance(str1.begin(), find(str1.begin(),str1.end(),str2[i]));
+			pos1.push_back(pos_in_1);
+			int pos_in_2 = std::distance(str2.begin(),
+					find(str2.begin(), str2.end(), str2[i]));
+			pos2.push_back(pos_in_2);
+			s.push_back(str2[i]);
+		}
+	}
+
+
+
+	cout << str1 << endl;
+	cout << str2 << endl;
+
+	for (int i = 0; i < (int)str1.length(); cout << i, i++);
+	cout << endl;
+	for (vector<int>::iterator it = pos1.begin(); it != pos1.end();
+				cout << *it, it++)
+			;
+		cout << endl;
+	for (vector<int>::iterator it = pos2.begin(); it != pos2.end();
+			cout << *it, it++)
+		;
+	cout << endl;
+	cout << s << endl;
+
+	return s.length();
+}

@@ -414,3 +414,39 @@ int maximun_children_length (string str1, string str2){
 
 	return s.length();
 }
+
+int lcs_memoized(string S, int n, string T, int m){
+
+	int result = 0;
+	if (arr[n][m] != -1){
+		return arr[n][m];
+	}
+	if (n == (int)S.length() || m == (int)T.length()){
+		return 0;
+	}
+	if(S[n] == T[m]){
+		result = 1+ lcs(S, n+1, T, m+1);
+	} else {
+		result = max(lcs(S, n+1, T, m), lcs(S, n, T, m+1));
+		arr[n][m] = result;
+	}
+	return result;
+}
+
+int lcs(string S, string T){
+	int n = S.length();
+	    int m = T.length();
+	    for (int i = 0; i < n; i++){
+	        for(int j = 0; j < m; j++){
+	            if (i == 0 || j == 0){
+	                arr[i][j] = 0;
+	            }
+	            if(S[i] == T [j]){
+	                arr[i+1][j+1] = arr[i][j]+1;
+	            } else{
+	              arr[i+1][j+1] = max(arr[i+1][j], arr[i][j+1]);  
+	            }
+	        }
+	    }
+	   return arr[n][m];
+}

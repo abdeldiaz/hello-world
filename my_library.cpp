@@ -450,3 +450,61 @@ int lcs(string S, string T){
 	    }
 	   return arr[n][m];
 }
+
+vector <int> suffixArray(string s){
+	vector <int> r;
+	vector <string> vs;
+
+	vs.clear();
+	for(int i = 0; i < (int)s.length(); vs.push_back(s.substr(i,s.length())), i++);
+
+	cout << " suffixes without sorting" << endl;
+	for (vector <string>::iterator it = vs.begin(); it != vs.end(); cout << *it << endl,  it++);
+
+	sort(vs.begin(), vs.end());
+
+	cout << " suffixes after  sorting" << endl;
+	for (vector <string>::iterator it = vs.begin(); it != vs.end(); cout << *it << endl,  it++);
+
+	int cnt[26];
+	int n = s.length();
+	int ind[26];
+	for (int i = 0; i < 26; ind[i] = i, i++);
+	for (int i = 0; i < n; cnt[i] = s[i]-'a', i++);
+
+	cout << "before " << endl;
+	// printing the position
+	for (int i = 0; i < n; cout << ind[i] << "\t", i++)
+		;
+	cout << endl;
+	// printing string
+	for (int i = 0; i < n; cout << s[i] << "\t", i++)
+		;
+	cout << endl;
+	// printing cnt
+	for (int i = 0; i < n; cout << cnt[i] << "\t", i++)
+		;
+	cout << endl;
+
+
+	int o_cnt[26];
+	int o_ind[26];
+	int ii =0;
+	sort(cnt, ind, 0, ii, o_cnt, o_ind );
+
+	cout << "after " << endl;
+	// printing the position
+	for (int i = 0; i < n; cout << o_ind[i] << "\t", i++)
+		;
+	cout << endl;
+	// printing string
+	for (int i = 0; i < n; cout << s[i] << "\t", i++)
+		;
+	cout << endl;
+	// printing cnt
+	for (int i = 0; i < n; cout << o_cnt[i] << "\t", i++)
+		;
+	cout << endl;
+
+	return r;
+}

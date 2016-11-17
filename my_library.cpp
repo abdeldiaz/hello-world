@@ -8,8 +8,42 @@
 #include <vector>
 #include <map>
 #include <cmath>
+#include <typeinfo>
+#include <limits>
 
 using namespace std;
+
+unsigned long long combine(unsigned int low, unsigned int high) {
+	return (((unsigned long long) high) << 32) | ((unsigned long long) low);
+}
+
+unsigned int high(unsigned long long combined) {
+	return combined >> 32;
+}
+
+unsigned int low(unsigned long long combined) {
+	unsigned long long mask = numeric_limits<unsigned int>::max();
+	return mask & combined;
+}
+
+template<unsigned int byte> class BITS_SET {
+public:
+	enum {
+		B0 = (byte & 0x01) ? 1 : 0, B1 = (byte & 0x02) ? 1 : 0, 
+		B2 = (byte & 0x04) ? 1 : 0, B3 = (byte & 0x08) ? 1 : 0, 
+		B4 = (byte & 0x10) ? 1 : 0, B5 = (byte & 0x20) ? 1 : 0, 
+		B6 = (byte & 0x40) ? 1 : 0, B7 = (byte & 0x80) ? 1 : 0,
+		B8 = (byte & 0x100) ? 1 : 0, B9 = (byte & 0x200) ? 1 : 0, 
+		B10 =(byte & 0x400) ? 1 : 0, B11 = (byte & 0x800) ? 1 : 0, 
+		B12 =(byte & 0x1000) ? 1 : 0, B13 = (byte & 0x2000) ? 1 : 0, 
+		B14 =(byte & 0x4000) ? 1 : 0, B15 = (byte & 0x8000) ? 1 : 0
+	};
+public:
+	enum {
+		RESULT = B0 + B1 + B2 + B3 + B4 + B5 + B6 + B7 + B8 + B9 + B10 + B11
+				+ B12 + B13 + B14 + B15
+	};
+};
 
 double sqrt(const double n) {
 	double g = 4;

@@ -542,3 +542,283 @@ vector <int> suffixArray(string s){
 
 	return r;
 }
+void merge(vector<int>& a, size_t begin, size_t end, size_t mid) {
+
+	size_t n = end - begin;
+	std::vector<size_t> temp(n);
+
+	size_t i = begin, j = mid, k = 0;
+
+	while (i < mid && j < end) {
+		temp[k++] = (a[i] < a[j]) ? a[i++] : a[j++];
+	}
+	while (i < mid) {
+		temp[k++] = a[i++];
+	}
+	while (j < end) {
+		temp[k++] = a[j++];
+	}
+
+	for (size_t k = 0; k < n; k++) {
+		a[begin + k] = temp[k];
+	}
+
+}
+
+void merge_sort(vector<int>& ar, size_t begin, size_t end) {
+	int mid;
+	if ((end - begin) <= 1)
+		return;
+	mid = ((end + begin) / 2);
+	merge_sort(ar, begin, mid);
+	merge_sort(ar, mid, end);
+	merge(ar, begin, end, mid);
+}
+
+bool is_vowel(char a) {
+	if (a == 'a' || a == 'e' || a == 'i' || a == 'o' || a == 'u' || a == 'y') {
+		return true;
+	}
+	return false;
+}
+
+void beautiful_world(string str) {
+	size_t i = 1;
+	while (i < str.length()) {
+		if (str[i] == str[i - 1]) {
+			cout << "No" << endl;
+			return;
+		}
+		if (is_vowel(str[i]) && is_vowel(str[i - 1])) {
+			cout << "No" << endl;
+			return;
+		}
+		i++;
+	}
+	cout << "Yes" << endl;
+}
+
+
+size_t make_equal_length(string &str1, string &str2) {
+	size_t len1 = str1.length();
+	size_t len2 = str2.length();
+	if (len1 < len2) {
+		for (size_t i = 0; i < len2 - len1; i++)
+			str1 = '0' + str1;
+		return len2;
+	} else if (len1 > len2) {
+		for (size_t i = 0; i < len1 - len2; i++)
+			str2 = '0' + str2;
+	}
+	return len1; // If len1 >= len2
+}
+
+string substring(string n1, size_t begin, size_t end) {
+	string ret;
+	for (size_t i = begin; i < end; i++) {
+		ret += n1[i];
+	}
+	return ret;
+}
+
+string add_str(string str1, string str2) {
+	string result;
+
+	size_t length = make_equal_length(str1, str2);
+
+	//cout << "str1=" << str1 << endl;
+	//cout << "str2=" << str2 << endl;
+	//cout << "+-----------------" << endl;
+	//cout << "length = " << length << endl;
+
+	int carry = 0;
+	for (int i = length - 1; i >= 0; i--) {
+
+		//cout << "i = " << i << endl;
+		int a = (int) str1[i] - 48;
+		//cout << "a = " << a << endl;
+		int b = (int) str2[i] - 48;
+		//cout << "b = " << b << endl;
+		int val = a + b + carry;
+		//cout << "val = " << val << endl;
+		//cout << "carry " << carry << endl;
+		if (val >= 10) {
+			carry = 1;
+			val = val - 10;
+		} else {
+			carry = 0;
+		}
+		result = to_string(val) + result;
+	}
+	if (carry > 0)
+		result = to_string(carry) + result;
+
+	//cout << "= " << result << endl;
+	//cout << endl;
+	return result;
+}
+
+string substract_str(string str1, string str2) {
+	stringstream strm_result;
+	string result;
+	bool negative = false;
+	if (strcmp(str2.c_str(), "0") == 0) {
+		return str1;
+	}
+	if (strcmp(str1.c_str(), "0") == 0) {
+		return "-" + str1;
+	}
+
+	size_t length = make_equal_length(str1, str2);
+
+	//cout << "str1=" << str1 << endl;
+			//cout << "str2=" << str2 << endl;
+			//cout << "-_____________" << endl;
+
+	if ( str1[0]-str2[0] < 0 ){
+		string temp = str1;
+		str1=str2;
+		str2=temp;
+		negative =true;
+	}
+
+
+
+	int carry = 0;
+	int val = 0;
+	for (int i = length - 1; i >= 0; i--) {
+		//cout << "i = " << i << endl;
+		int a = (int) str1[i] - 48;
+		//cout << "a = " << a << endl;
+		int b = (int) str2[i] - 48;
+		//cout << "b = " << b << endl;
+		if ((b + carry) > a) {
+			val = a + 10 - (b + carry);
+			carry = 1;
+		} else {
+			val = a - (b + carry);
+			carry = 0;
+		}
+		//cout << "carry " << carry << endl;
+		//cout << "val = " << val << endl;
+		result = to_string(val)+result;
+	}
+	//result = strm_result.str();
+//if (result[result.length() - 1] == 0)
+
+
+	while (result[0] == '0')
+		result.erase(0, 1);
+
+	if (negative)
+			result = "-"+result;
+	//cout << "= " << result << endl;
+
+	return result;
+}
+
+string add_zeroes(string str, int count) {
+	string ret = str;
+	for (int i = 0; i < count; i++) {
+		ret = ret + "0";
+	}
+	return ret;
+}
+
+string str_base10_pow(string str, int exp) {
+	if (strcmp(str.c_str(), "0") == 0) {
+		return "0";
+	}
+	//int num = pow(10, exp);
+	//int zero_count = digit_count(num) - 1;
+	string ret = str;
+	for (int i = 0; i < exp; i++) {
+		ret = ret + "0";
+	}
+	return ret;
+}
+
+string str_karatsuba(string n1, string n2) {
+
+#ifdef DEBUG
+	cout << "str_n1=" << n1 << " str_n2=" << n2 << endl;
+#endif
+
+	if (n1.length() < 2 || n2.length() < 2) {
+		std::stringstream ss;
+		unsigned long val = strtoul(n1.c_str(), NULL, 0)
+				* strtoul(n2.c_str(), NULL, 0);
+		return to_string(val);
+	}
+
+	size_t m = n1.length();
+	size_t n = n2.length();
+	m = (m > n) ? m : n;
+	size_t m2 = (m / 2) + (m % 2);
+
+#ifdef DEBUG
+	cout << "str_m2=" << m2 << endl;
+#endif
+	string h1 = substring(n1, 0, n1.length() - m2); //n1 / pow(10, m2);l
+	h1 = (!h1.empty()) ? h1 : "0";
+	string l1 = substract_str(n1, add_zeroes(h1, m2)); //n1 - h1*pow(10, m2);
+	l1 = (!l1.empty()) ? l1 : "0";
+
+	string h2 = substring(n2, 0, n2.length() - m2); //n2 / pow(10, m2);
+	h2 = (!h2.empty()) ? h2 : "0";
+	string l2 = substract_str(n2, add_zeroes(h2, m2)); //n2 - h2*pow(10, m2);
+	l2 = (!l2.empty()) ? l2 : "0";
+
+#ifdef DEBUG
+	cout << "str_h1=" << h1 << endl;
+	cout << "str_l1=" << l1 << endl;
+	cout << "str_h2=" << h2 << endl;
+	cout << "str_l2=" << l2 << endl;
+#endif
+
+	string z0 = str_karatsuba(l1, l2);
+	string z1 = str_karatsuba(add_str(l1, h1), add_str(l2, h2));
+	string z2 = str_karatsuba(h1, h2);
+
+#ifdef DEBUG
+	if ( z0[0] == '-' ){
+		cout << " str_z0 negative value" << endl;
+		cout << " l1 ="<< l1 <<" l2="<<l2 << endl;
+	}
+	if ( z1[0] == '-' ){
+			cout << "str_z1 negative value" << endl;
+			cout << " l1 ="<< l1 <<" l2="<<l2 << endl;
+			cout << " h1 ="<< h1 <<" h2="<<h2 << endl;
+	}
+	if ( z2[0] == '-' ){
+			cout << "str_z2 negative value" << endl;
+			cout << " h1 ="<< h1 <<" h2="<<h2 << endl;
+	}
+#endif
+
+
+#ifdef DEBUG
+	cout << "str_z0=" << z0 << endl;
+	cout << "str_z1=" << z1 << endl;
+	cout << "str_z2=" << z2 <<endl;
+#endif
+
+	string a = str_base10_pow(z2, 2 * m2);
+	string b = str_base10_pow(substract_str(substract_str(z1, z2), z0), m2);
+	string c = add_str(add_str(a, b), z0);
+
+#ifdef DEBUG
+	cout << "here m2=" << m2 << endl;
+	cout << "str_a=" << a << endl;
+	cout << "str_b=" << b << endl;
+	cout << "str_c=" << c <<endl;
+	if ( c[0] == '-' ){
+				cout << "str_c negative value" << endl;
+		}
+#endif
+
+	return c; //(z2*pow(10,2*m2))+((z1-z2-z0)*pow(10,m2))+z0;
+}
+
+
+

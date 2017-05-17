@@ -575,6 +575,58 @@ void merge_sort(vector<int>& ar, size_t begin, size_t end) {
 	merge(ar, begin, end, mid);
 }
 
+size_t count_split_inv(vector<int>& a, size_t begin, size_t end, size_t mid) {
+
+	size_t n = end - begin;
+	std::vector<size_t> temp(n);
+
+	size_t i = begin, j = mid, k = 0;
+	size_t inv_count = 0;
+
+	//cout << "comparing: " << endl;
+			//print_list(a, begin, mid);
+			//cout << "and " << endl;
+			//print_list(a, mid, end);
+
+	while (i < mid && j < end) {
+
+
+		if (a[i] < a[j]) {
+			temp[k++] = a[i++];
+		} else {
+			//cout << a[i] << " > " << a[j] << " inversion" << endl;
+			temp[k++] = a[j++];
+			inv_count = inv_count + (mid-i);
+		}
+	}
+	while (i < mid) {
+		temp[k++] = a[i++];
+	}
+	while (j < end) {
+		temp[k++] = a[j++];
+	}
+
+	for (size_t k = 0; k < n; k++) {
+		a[begin + k] = temp[k];
+	}
+
+	return inv_count;
+}
+
+size_t count_inv(vector<int>& ar, size_t begin, size_t end) {
+	int mid;
+	size_t inv_count = 0;
+	if ((end - begin) > 1) {
+		mid = ((end + begin) / 2);
+		//cout << "begin = " << begin << " mid = " << mid << " end = " << end << endl;
+		inv_count = count_inv(ar, begin, mid);
+		inv_count += count_inv(ar, mid, end);
+		inv_count += count_split_inv(ar, begin, end, mid);
+	}
+
+	return inv_count;
+}
+
 bool is_vowel(char a) {
 	if (a == 'a' || a == 'e' || a == 'i' || a == 'o' || a == 'u' || a == 'y') {
 		return true;

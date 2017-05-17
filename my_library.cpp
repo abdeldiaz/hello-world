@@ -872,5 +872,25 @@ string str_karatsuba(string n1, string n2) {
 	return c; //(z2*pow(10,2*m2))+((z1-z2-z0)*pow(10,m2))+z0;
 }
 
+vector<int> load_vector_from_file(string file_name) {
+	vector<int> ret;
+	ifstream in_stream;
+	string line;
+	in_stream.open(file_name.c_str(), std::ifstream::in);
+	if ( !in_stream.is_open() ) {
+		cout << "error while opening file" << endl;
+	}
+	while (getline(in_stream, line)) {
 
+		// processing line
+		long int num = strtol(line.c_str(), NULL, 0);
+		ret.push_back(num);
+
+	}
+	if (in_stream.bad())
+		cout << "error while reading file" << endl;
+	in_stream.close();
+
+	return ret;
+}
 

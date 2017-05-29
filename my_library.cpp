@@ -894,3 +894,104 @@ vector<int> load_vector_from_file(string file_name) {
 	return ret;
 }
 
+static void swap(vector<int> &arr, int i, int j) {
+	int temp = arr[i];
+	arr[i] = arr[j];
+	arr[j] = temp;
+}
+
+static int left_partition(vector<int> &arr, int l, int r) {
+	int pivot = arr[l];
+	int i = l + 1;
+
+	for (int j = i; j < r; j++) {
+		if (arr[j] < pivot) {
+			if (i != j)
+				swap(arr, j, i);
+			i++;
+		}
+	}
+	swap(arr, i - 1, l);
+	return i - 1;
+}
+
+static int right_partition(vector<int> &arr, int l, int r) {
+	int pivot = arr[r - 1];
+
+	int i = l;
+	for (int j = i; j < r - 1; j++) {
+		if (arr[j] < pivot) {
+			if (i != j)
+				swap(arr, i, j);
+			i++;
+		}
+	}
+	swap(arr, i, r - 1);
+	return i;
+}
+
+int get_median(vector<int> arr, int a, int b, int c) {
+	if ((arr[a] - arr[b]) * (arr[b] - arr[c]) > 0)
+		return b;
+	if ((arr[a] - arr[b]) * (arr[a] - arr[c]) > 0)
+		return c;
+	return a;
+}
+
+static int median_partition(vector<int> &arr, int l, int r) {
+	int lo = l;
+	int pivot = arr[lo];
+	int i = l + 1;
+	for (int j = i; j < r; j++) {
+		if (arr[j] < pivot) {
+			if (i != j)
+				swap(arr, j, i);
+			i++;
+		}
+	}
+	swap(arr, i - 1, lo);
+	return i - 1;
+}
+
+static int quik_sort_left_pivot(vector<int> &arr, int l, int r) {
+	int m = 0;
+	if (l < r) {
+		m = (r - l) - 1;
+		int p = left_partition(arr, l, r);
+		m += quik_sort_left_pivot(arr, l, p );
+		m += quik_sort_left_pivot(arr, p + 1, r);
+	}
+	return m;
+}
+
+static int quik_sort_right_pivot(vector<int> &arr, int l, int r) {
+	int m = 0;
+	if (l < r) {
+		swap(arr, l, r-1);
+		m = (r - l) - 1;
+		int p = left_partition(arr, l, r);
+		m += quik_sort_right_pivot(arr, l, p);
+		m += quik_sort_right_pivot(arr, p + 1, r);
+	}
+	return m;
+}
+
+
+static int quik_sort_median_pivot(vector<int> &arr, int l, int r) {
+	int m = 0;
+	if (l < r) {
+		int mid_index = ( ((r + l) % 2) > 0 )?((r + l) / 2):((r + l) / 2) - 1;
+		mid_index = (mid_index < l) ? l : mid_index;
+		int median_index = get_median(arr, l, mid_index, r - 1);
+
+		swap(arr, l, median_index);
+		m = (r - l) - 1;
+		int p = left_partition(arr, l, r);
+		m += quik_sort_median_pivot(arr, l, p);
+		m += quik_sort_median_pivot(arr, p + 1, r);
+	}
+	return m;
+}
+
+
+

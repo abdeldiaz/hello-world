@@ -1105,4 +1105,39 @@ void __contract(vector<st_subset> subsets, int x, int y) {
 	}
 }
 
+st_graph load_graph_from_file(string file_name) {
+	st_graph ret;
+	ifstream in_stream;
+	string line;
+	in_stream.open(file_name.c_str(), std::ifstream::in);
+	if (!in_stream.is_open()) {
+		cout << "error while opening file" << endl;
+	}
+	while (getline(in_stream, line)) {
+		// processing line
+		char *s_nxt;
+		char * pch;
+
+		long int __src = strtol(line.c_str(), &s_nxt, 0);
+		ret._vertices.push_back(__src);
+		s_nxt++;
+		pch = strtok (s_nxt,"\t\r");
+		while (pch != NULL) {
+			int __dest = atoi(pch);
+			st_edge __edge;
+			__edge.src = __src;
+			__edge.dest = __dest;
+			ret._edges.push_back(__edge);
+			pch = strtok(NULL, "\t\r");
+		}
+	}
+	if (in_stream.bad())
+		cout << "error while reading file" << endl;
+	in_stream.close();
+
+	return ret;
+}
+
+
+
 

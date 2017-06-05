@@ -993,5 +993,116 @@ static int quik_sort_median_pivot(vector<int> &arr, int l, int r) {
 	return m;
 }
 
+// Implementation for RSelection
+//....
+//
+
+
+// graph implementation 
+
+struct st_edge {
+	int src;
+	int dest;
+};
+
+struct st_graph {
+	vector<int> _vertices;
+	vector<st_edge> _edges;
+};
+
+// A structure to represent a subset for union-find
+struct st_subset {
+	int parent;
+	int rank;
+};
+
+// Function prototypes for union-find (These functions are defined
+// after kargerMinCut() )
+int __find(vector<st_subset> subsets, int vertex);
+void __contract(vector<st_subset> subsets, int x, int y);
+
+// A very basic implementation of Karger's randomized
+// algorithm for finding the minimum cut. Please note
+// that Karger's algorithm is a Monte Carlo Randomized algo
+// and the cut returned by the algorithm may not be
+// minimum always
+int karger_min_cut(st_graph* graph) {
+	// Get data of given graph
+	int V = graph->_vertices.size(), E = graph->_edges.size();
+	vector<st_edge> edges = graph->_edges;
+	vector<st_subset> subsets;
+
+	// Create V subsets with single elements
+	for (int i = 0; i < V; i++) {
+		st_subset _subset;
+		_subset.parent = graph->_vertices[i];
+		_subset.rank = 0;
+		subsets.push_back(_subset);
+	}
+
+	// Initially there are V vertices in contracted graph
+	int vertices = V;
+
+	// Keep contracting vertices until there are 2 vertices.
+	while (vertices > 2) {
+		// Pick a random edge
+		int rnd = rand() % E;
+
+		// Find vertices (or sets) of two corners
+		// of current edge
+		int subset1 = __find(subsets, edges[rnd].src);
+		int subset2 = __find(subsets, edges[rnd].dest);
+
+		// If two corners belong to same subset,
+		// then no point considering this edge
+		if (subset1 == subset2)
+			continue;
+		// Else contract the edge (or combine the corners of edge into one vertex)
+		else {
+			printf("Contracting edge %d-%d\n", edges[rnd].src, edges[rnd].dest);
+			vertices--;
+			__contract(subsets, subset1, subset2);
+		}
+	}
+
+// Now we have two vertices in the contracted graph, so count the edges between
+	int cutedges = 0;
+	for (int i = 0; i < E; i++) {
+		int subset1 = __find(subsets, edges[i].src);
+		int subset2 = __find(subsets, edges[i].dest);
+		if (subset1 != subset2)
+			cutedges++;
+	}
+
+	return cutedges;
+}
+
+// A utility function to find set of an element i
+// (uses path compression technique)
+int __find(vector<st_subset> subsets, int vertex) {
+// find root and make root as parent of i
+// (path compression)
+	if (subsets[vertex].parent != vertex) // this happens if as already compressed
+		subsets[vertex].parent = __find(subsets, subsets[vertex].parent);
+
+	return subsets[vertex].parent;
+}
+
+// A function that does union of two sets of x and y (uses union by rank)
+void __contract(vector<st_subset> subsets, int x, int y) {
+	int xroot = __find(subsets, x);
+	int yroot = __find(subsets, y);
+
+// Attach smaller rank tree under root of high rank tree (Union by Rank)
+	if (subsets[xroot].rank < subsets[yroot].rank)
+		subsets[xroot].parent = yroot;
+	else if (subsets[xroot].rank > subsets[yroot].rank)
+		subsets[yroot].parent = xroot;
+// If ranks are same, then make one as root and increment its rank by one
+	else {
+		subsets[yroot].parent = xroot;
+		subsets[xroot].rank++;
+	}
+}
 
 

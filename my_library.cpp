@@ -1000,26 +1000,31 @@ static int quik_sort_median_pivot(vector<int> &arr, int l, int r) {
 
 // graph implementation 
 
+truct st_vertex {
+	int val;
+	size_t index;
+};
+
 struct st_edge {
-	int src;
-	int dest;
+	st_vertex *src;
+	st_vertex *dest;
 };
 
 struct st_graph {
-	vector<int> _vertices;
+	vector<st_vertex> _vertices;
 	vector<st_edge> _edges;
 };
 
 // A structure to represent a subset for union-find
 struct st_subset {
-	int parent;
+	st_vertex parent;
 	int rank;
 };
 
 // Function prototypes for union-find (These functions are defined
 // after kargerMinCut() )
-int __find(vector<st_subset> subsets, int vertex);
-void __contract(vector<st_subset> subsets, int x, int y);
+st_vertex __find(vector<st_subset> subsets, st_vertex vertex);
+void __contract(vector<st_subset> subsets, st_vertex x, st_vertex y);
 
 // A very basic implementation of Karger's randomized
 // algorithm for finding the minimum cut. Please note
@@ -1027,50 +1032,51 @@ void __contract(vector<st_subset> subsets, int x, int y);
 // and the cut returned by the algorithm may not be
 // minimum always
 int karger_min_cut(st_graph* graph) {
-	// Get data of given graph
-	int V = graph->_vertices.size(), E = graph->_edges.size();
+
+	int n = graph->_vertices.size(), m = graph->_edges.size();
 	vector<st_edge> edges = graph->_edges;
 	vector<st_subset> subsets;
 
-	// Create V subsets with single elements
-	for (int i = 0; i < V; i++) {
+	// Create n subsets with single vertex
+	for (int i = 0; i < n; i++) {
 		st_subset _subset;
-		_subset.parent = graph->_vertices[i];
+		_subset.parent = graph->_vertices.at(i);
 		_subset.rank = 0;
 		subsets.push_back(_subset);
 	}
 
 	// Initially there are V vertices in contracted graph
-	int vertices = V;
+	int vertices = n;
 
 	// Keep contracting vertices until there are 2 vertices.
 	while (vertices > 2) {
 		// Pick a random edge
-		int rnd = rand() % E;
+		int rnd = rand() % m;
 
 		// Find vertices (or sets) of two corners
 		// of current edge
-		int subset1 = __find(subsets, edges[rnd].src);
-		int subset2 = __find(subsets, edges[rnd].dest);
+		st_vertex _vertex1 = __find(subsets, *edges.at(rnd).src);
+		st_vertex _vertex2 = __find(subsets, *edges.at(rnd).dest);
 
 		// If two corners belong to same subset,
 		// then no point considering this edge
-		if (subset1 == subset2)
+		if (_vertex1.val == _vertex2.val)
 			continue;
 		// Else contract the edge (or combine the corners of edge into one vertex)
 		else {
-			printf("Contracting edge %d-%d\n", edges[rnd].src, edges[rnd].dest);
+			cout << "Contracting edges: " << edges.at(rnd).src << " - "
+					<< edges.at(rnd).dest << endl;
 			vertices--;
-			__contract(subsets, subset1, subset2);
+			__contract(subsets, _vertex1, _vertex2);
 		}
 	}
 
 // Now we have two vertices in the contracted graph, so count the edges between
 	int cutedges = 0;
-	for (int i = 0; i < E; i++) {
-		int subset1 = __find(subsets, edges[i].src);
-		int subset2 = __find(subsets, edges[i].dest);
-		if (subset1 != subset2)
+	for (int i = 0; i < m; i++) {
+		st_vertex subset1 = __find(subsets, *edges.at(i).src);
+		st_vertex subset2 = __find(subsets, *edges.at(i).dest);
+		if (subset1.val != subset2.val)
 			cutedges++;
 	}
 
@@ -1079,30 +1085,44 @@ int karger_min_cut(st_graph* graph) {
 
 // A utility function to find set of an element i
 // (uses path compression technique)
-int __find(vector<st_subset> subsets, int vertex) {
+st_vertex __find(vector<st_subset> subsets, st_vertex vertex) {
 // find root and make root as parent of i
 // (path compression)
-	if (subsets[vertex].parent != vertex) // this happens if as already compressed
-		subsets[vertex].parent = __find(subsets, subsets[vertex].parent);
+	if (subsets.at(vertex.index).parent.val != vertex.val) // this happens if as already compressed
+		subsets.at(vertex.index).parent = __find(subsets,
+				subsets.at(vertex.index).parent);
 
-	return subsets[vertex].parent;
+	return subsets.at(vertex.index).parent;
 }
 
 // A function that does union of two sets of x and y (uses union by rank)
-void __contract(vector<st_subset> subsets, int x, int y) {
-	int xroot = __find(subsets, x);
-	int yroot = __find(subsets, y);
+void __contract(vector<st_subset> subsets, st_vertex x, st_vertex y) {
+	st_vertex xroot = __find(subsets, x);
+	st_vertex yroot = __find(subsets, y);
 
 // Attach smaller rank tree under root of high rank tree (Union by Rank)
-	if (subsets[xroot].rank < subsets[yroot].rank)
-		subsets[xroot].parent = yroot;
-	else if (subsets[xroot].rank > subsets[yroot].rank)
-		subsets[yroot].parent = xroot;
+	if (subsets.at(xroot.index).rank < subsets.at(yroot.index).rank)
+		subsets.at(xroot.index).parent.val = yroot.val;
+	else if (subsets.at(xroot.index).rank > subsets.at(yroot.index).rank)
+		subsets.at(yroot.index).parent.val = xroot.val;
 // If ranks are same, then make one as root and increment its rank by one
 	else {
-		subsets[yroot].parent = xroot;
-		subsets[xroot].rank++;
+		subsets.at(yroot.index).parent.val = xroot.val;
+		subsets.at(xroot.index).rank++;
 	}
+}
+
+vector<st_vertex>::iterator find_vertex(vector<st_vertex> i_vertices,
+		int __vertex_value) {
+	vector<st_vertex>::iterator ret = i_vertices.end();
+	for (vector<st_vertex>::iterator it = i_vertices.begin();
+			it != i_vertices.end(); it++) {
+		if ((*it).val == __vertex_value) {
+			ret = it;
+			break;
+		}
+	}
+	return ret;
 }
 
 st_graph load_graph_from_file(string file_name) {
@@ -1113,24 +1133,34 @@ st_graph load_graph_from_file(string file_name) {
 	if (!in_stream.is_open()) {
 		cout << "error while opening file" << endl;
 	}
+	size_t __index = 0;
 	while (getline(in_stream, line)) {
-		// processing line
+		long int __src = strtol(line.c_str(), NULL, 0);
+		st_vertex __vertex;
+		__vertex.index = __index;
+		__vertex.val = __src;
+		ret._vertices.push_back(__vertex);
+		__index++;
+	}
+	in_stream.seekg(in_stream.beg);
+	while (getline(in_stream, line)) {
 		char *s_nxt;
 		char * pch;
-
 		long int __src = strtol(line.c_str(), &s_nxt, 0);
-		ret._vertices.push_back(__src);
 		s_nxt++;
-		pch = strtok (s_nxt,"\t\r");
+		pch = strtok(s_nxt, "\t\r");
 		while (pch != NULL) {
-			int __dest = atoi(pch);
+			long int __dest = atoi(pch);
 			st_edge __edge;
-			__edge.src = __src;
-			__edge.dest = __dest;
+			__edge.src = &(*find_vertex(ret._vertices, __src));
+			__edge.dest = &(*find_vertex(ret._vertices, __dest));
 			ret._edges.push_back(__edge);
 			pch = strtok(NULL, "\t\r");
 		}
 	}
+
+	//
+
 	if (in_stream.bad())
 		cout << "error while reading file" << endl;
 	in_stream.close();
@@ -1138,6 +1168,17 @@ st_graph load_graph_from_file(string file_name) {
 	return ret;
 }
 
+void print_graph(st_graph *graph) {
+	for (size_t i = 0; i < graph->_vertices.size(); i++) {
+		cout << "vertex[" << i << "] = " << graph->_vertices.at(i).val << endl;
+	}
 
+	cout << "edges count = " << graph->_edges.size() << endl;
+	for (size_t i = 0; i < graph->_edges.size(); i++) {
+		cout << "edge[" << i << "] = ( " << graph->_edges.at(i).src->val
+				<< " ) ==== ( " << graph->_edges.at(i).dest->val << " )"
+				<< endl;
+	}
+}
 
 

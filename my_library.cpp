@@ -1110,7 +1110,6 @@ int find_vertex_index(vector<int> vertices, int val) {
 	return ret;
 }
 
-
 // A utility function to find set of an element i
 // (uses path compression technique)
 int find(int subsets[], int i)
@@ -1158,8 +1157,6 @@ struct Graph* createGraph(int V, int E)
     return graph;
 }
 
-
-
 void load_graph_from_file(string file_name, vector <int> *vertices, vector < pair <int,int> >* edges) {
 
 	ifstream in_stream;
@@ -1199,6 +1196,54 @@ void print_graph(st_graph *graph) {
 				<< " ) ==== ( " << graph->_edges.at(i).dest->val << " )"
 				<< endl;
 	}
+}
+
+int strfind(string str1, string str2){
+	for (size_t i = 0; i < str1.length(); i++) {
+		size_t j = 0, k = i;
+		while (str1[k] == str2[j] && j < str2.length()) {
+			k++;j++;
+		}
+		if (j == str2.length() )
+			return i;
+	}
+	return -1;
+}
+
+string str_exp_to_str_int(string exp_str){
+	string num;
+	// find if the string has the pattern e|symbol|exponent looking for the first element e
+	int i = strfind(exp_str,"e");
+	char str_t[i+1];
+
+	if (i > 0) { // if it doe not have e is a regular number
+		// copy the first element
+		strncpy(str_t, exp_str.c_str(), i);
+		str_t[i] = '\0';
+		num += str_t[0];
+		// jump the point or comma and copy the rest of the elements
+		for (size_t j = 2; j < (sizeof(str_t) / sizeof(char)) -1 ; j++) {
+			num += str_t[j];
+		}
+		// determine if the symbol is + or - (for radios we will always work with positives)
+		if (exp_str[i + 1] == '+') {
+			i++;
+			// get the exponent number
+			string exp;
+			for (size_t j = i + 1; j < sizeof(exp_str) / sizeof(char); j++) {
+				exp += exp_str[j];
+			}
+			size_t i_exp = atoi(exp.c_str());
+			//add exponent amount of zeroes
+			while (num.length() < (i_exp+1) ){
+				num += "0";
+			}
+		}
+	}
+	else {
+		num = exp_str;
+	}
+	return num;
 }
 
 int main() {

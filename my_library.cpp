@@ -10,6 +10,7 @@
 #include <cmath>
 #include <typeinfo>
 #include <limits>
+#include <functional>
 
 using namespace std;
 
@@ -1244,6 +1245,75 @@ string str_exp_to_str_int(string exp_str){
 		num = exp_str;
 	}
 	return num;
+}
+
+typedef priority_queue<unsigned int> type_H_low;
+typedef priority_queue<unsigned int, std::vector<unsigned int>, std::greater<unsigned int> > type_H_high;
+
+size_t signum(int left, int right) {
+	if (left == right){
+		return 0;
+	}
+	return (left < right)?-1:1;
+}
+
+void getMedian( unsigned int x_i, unsigned int &m, type_H_low *l, type_H_high *r) {
+	int sig = signum( l->size(), r->size() );
+
+	switch (sig) {
+	case 1: // There are more elements in left (max) heap
+		if (x_i < m) {
+			r->push(l->top());
+			l->pop();
+			l->push(x_i);
+		} else {
+			r->push(x_i);
+		}
+		break;
+
+    case 0: // The left and right heaps contain same number of elements
+		if (x_i < m){
+			l->push(x_i);
+		} else {
+			r->push(x_i);
+		}
+        break;
+
+    case -1: // There are more elements in right (min) heap
+		if (x_i < m){
+			l->push(x_i);
+		} else {
+			l->push(r->top());
+			r->pop();
+			r->push(x_i);
+		}
+        break;
+    }
+
+	if (l->size() == r->size()){
+		m = l->top();
+	} else if (l->size() > r->size()){
+		m = l->top();
+	} else {
+		m = r->top();
+	}
+
+    return;
+}
+
+void printMedian(vector<unsigned int> v) {
+	unsigned int median = 0;
+	long int sum = 0;
+	type_H_low  H_low;
+	type_H_high H_high;
+
+	for (vector<unsigned int>::iterator x_i = v.begin(); x_i != v.end(); x_i++) {
+		getMedian(*x_i, median, &H_low, &H_high);
+		sum += median;
+		cout << median << endl;
+	}
+
+	cout << " sum = " << sum%10000 << endl;
 }
 
 int main() {

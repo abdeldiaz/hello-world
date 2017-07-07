@@ -1316,6 +1316,26 @@ void printMedian(vector<unsigned int> v) {
 	cout << " sum = " << sum%10000 << endl;
 }
 
+void print2Sum(tr1::unordered_set<long int> v, long int low, long int high) {
+	tr1::unordered_set<long int> set;
+	size_t count = 0;
+	tr1::unordered_set<long int>::iterator x = v.begin();
+	while (x != v.end()) {
+		long int y = low - *x;
+		while (y <= high - *x) {
+			if (v.find(y) != v.end()) {
+				if (set.find(*x + y) == set.end()) {
+					set.insert(*x + y);
+					count++;
+				}
+			}
+			y++;
+		}
+		x++;
+	}
+	cout << "total number of distinctive pairs = " << count << endl;
+}
+
 int main() {
 	vector <int> vertices;
 	vector < pair <int,int> > edges;

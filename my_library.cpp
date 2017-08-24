@@ -1336,6 +1336,234 @@ void print2Sum(tr1::unordered_set<long int> v, long int low, long int high) {
 	cout << "total number of distinctive pairs = " << count << endl;
 }
 
+struct job {
+	int num;
+	int weight;
+	int length;
+};
+
+bool difference(job a, job b) {
+
+	int l = (a.weight - a.length);
+	int r = (b.weight - b.length);
+
+	if (l == r) {
+		return (a.weight > b.weight);
+	}
+	return (l > r);
+}
+
+bool ratio(job a, job b) {
+
+	float l = ((float) a.weight / (float) a.length);
+	float r = ((float) b.weight / (float) b.length);
+
+	if (l == r) {
+		return (a.weight > b.weight);
+	}
+	return (l > r);
+}
+
+void load_jobs(string file_name, vector<job> &jobs) {
+	ifstream in_stream;
+	string line;
+	in_stream.open(file_name.c_str(), std::ifstream::in);
+	if (!in_stream.is_open()) {
+		cout << "error while opening file" << endl;
+		return;
+	}
+	getline(in_stream, line);
+	size_t count = 0;
+	count = strtol(line.c_str(), NULL, 0);
+
+	for (size_t i = 0; i < count && !in_stream.bad(); i++) {
+		getline(in_stream, line);
+		job a;
+		char *s_nxt;
+		a.num = i + 1;
+		a.weight = strtol(line.c_str(), &s_nxt, 0);
+		s_nxt++;
+		a.length = strtol(s_nxt, NULL, 0);
+
+		jobs.push_back(a);
+	}
+	if (in_stream.bad())
+		cout << "error while reading file" << endl;
+	in_stream.close();
+}
+
+void print_jobs(vector<job> jobs) {
+	for (vector<job>::iterator it = jobs.begin(); it != jobs.end(); it++) {
+		cout << "job[" << (*it).num << "] weight = " << (*it).weight
+				<< " length = " << (*it).length << endl;
+		;
+	}
+}
+
+long int weighted_sum_of_completion_times(vector<job> jobs) {
+	long ret = 0;
+	long sum_length = 0;
+	for (vector<job>::iterator it = jobs.begin(); it != jobs.end(); it++) {
+		sum_length += (*it).length;
+		ret += ((*it).weight * sum_length);
+	}
+	return ret;
+}
+
+struct node {
+	int dest;
+	int weight;
+};
+
+typedef vector<node> adj_nodes;
+
+struct adj_list_elem {
+	long vertex;
+	adj_nodes adj_list_node;
+};
+
+struct graph {
+	size_t V, E;
+	vector<adj_list_elem> array;
+};
+
+int find(vector<adj_list_elem> array, long element) {
+	int ret = 0;
+	for (vector<adj_list_elem>::iterator it = array.begin(); it != array.end();
+			it++) {
+		if ((*it).vertex == element) {
+			return ret;
+		}
+		ret++;
+	}
+	return -1;
+}
+
+void load_graph_from_file3(string file_name, graph &graph) {
+
+	ifstream in_stream;
+	string line;
+	in_stream.open(file_name.c_str(), std::ifstream::in);
+	if (!in_stream.is_open()) {
+		cout << "error while opening file" << endl;
+		return;
+	}
+	char *s_nxt, *s_nxt1;
+
+	getline(in_stream, line);
+	graph.V = strtol(line.c_str(), &s_nxt, 0);
+	s_nxt++;
+	graph.E = strtol(s_nxt, NULL, 0);
+
+	while (getline(in_stream, line)) {
+
+		long __src = strtol(line.c_str(), &s_nxt, 0);
+		s_nxt++;
+		long __dest = strtol(s_nxt, &s_nxt1, 0);
+		s_nxt1++;
+		long __weight = strtol(s_nxt1, NULL, 0);
+
+		node src_dest_edge;
+		src_dest_edge.dest = __dest;
+		src_dest_edge.weight = __weight;
+
+		node dest_src_edge;
+		dest_src_edge.dest = __src;
+		dest_src_edge.weight = __weight;
+
+		int find_res;
+
+		find_res = find(graph.array, __src);
+		if (find_res == -1) {
+			adj_list_elem adj_list_node;
+			adj_list_node.vertex = __src;
+			adj_list_node.adj_list_node.push_back(src_dest_edge);
+			graph.array.push_back(adj_list_node);
+		} else {
+			graph.array[find_res].adj_list_node.push_back(src_dest_edge);
+		}
+
+		find_res = find(graph.array, __dest);
+		if (find_res == -1) {
+			adj_list_elem adj_list_node;
+			adj_list_node.vertex = __dest;
+			adj_list_node.adj_list_node.push_back(dest_src_edge);
+			graph.array.push_back(adj_list_node);
+		} else {
+			graph.array[find_res].adj_list_node.push_back(dest_src_edge);
+		}
+	}
+	if (in_stream.bad())
+		cout << "error while reading file" << endl;
+	in_stream.close();
+}
+
+void print_st_graph(graph graph) {
+	cout << "graph.V = " << graph.V << endl;
+	cout << "graph.E = " << graph.E << endl;
+	for (vector<adj_list_elem>::iterator it = graph.array.begin();
+			it != graph.array.end(); it++) {
+		for (adj_nodes::iterator node = (*it).adj_list_node.begin();
+				node != (*it).adj_list_node.end(); node++) {
+			cout << (*it).vertex << "-" << (*node).dest << " ("
+					<< (*node).weight << ")" << endl;
+		}
+
+	}
+}
+
+adj_nodes& find(graph i_graph, long element){
+	adj_nodes ret;
+	for ( vector<adj_list_elem>::iterator it = i_graph.array.begin(); it != i_graph.array.end(); it++){
+		if ( (*it).vertex == element){
+			return (*it).adj_list_node;
+		}
+	}
+	return ret;
+}
+
+adj_list_elem get_cheap_edge(vector<long> &X, graph i_graph) {
+
+	adj_list_elem r;
+	node ret;
+	ret.weight = INT_MAX;
+	ret.dest = 0;
+
+	for (vector<long>::iterator it = X.begin(); it != X.end(); it++) {
+		adj_nodes nodes = find(i_graph, (*it));
+		for (adj_nodes::iterator jt = nodes.begin(); jt != nodes.end(); jt++) {
+			if (((*jt).weight < ret.weight)
+					&& (find(X.begin(), X.end(), (*jt).dest) == X.end())) {
+				ret.weight = (*jt).weight;
+				ret.dest = (*jt).dest;
+				r.vertex = (*it);
+			}
+		}
+	}
+	r.adj_list_node.push_back(ret);
+	X.push_back(ret.dest);
+	return r;
+}
+
+void prim_mst(graph graph, long &prim_result) {
+
+	vector<long> X;
+	X.push_back(graph.array[0].vertex);
+	vector<adj_list_elem> T;
+
+	while (X.size() < graph.V) {
+		adj_list_elem ret = get_cheap_edge(X, graph);
+		T.push_back(ret);
+	}
+
+	for (vector<adj_list_elem>::iterator it = T.begin(); it != T.end(); it++) {
+		for (adj_nodes::iterator node = (*it).adj_list_node.begin();
+				node != (*it).adj_list_node.end(); node++) {
+			prim_result += (*node).weight;
+		}
+	}
+}
+
 int main() {
 	vector <int> vertices;
 	vector < pair <int,int> > edges;

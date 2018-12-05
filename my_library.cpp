@@ -1564,6 +1564,10 @@ void prim_mst(graph graph, long &prim_result) {
 	}
 }
 
+void* memcpy_s(void *__restrict dest, size_t offset, const void *__restrict src, size_t count){
+	return memcpy((char*)dest+offset, src, count );
+}
+
 int main() {
 	vector <int> vertices;
 	vector < pair <int,int> > edges;

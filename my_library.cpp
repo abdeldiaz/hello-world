@@ -14,6 +14,79 @@
 
 using namespace std;
 
+
+int ntpdatesync(const std::string &host_url, int port, std::string& str_error) {
+	int ret = 0;
+	struct protoent *proto;
+	int sock;
+
+	proto = getprotobyname("udp");
+	ret = sock = socket(PF_INET, SOCK_DGRAM, proto->p_proto);
+	if (-1 != ret) {
+		struct sockaddr_in server_addr;
+		int __port = port;         //NTP is port 123
+		char *hostname = (char *) host_url.data();
+		unsigned char msg[48] = { 010, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+		memset(&server_addr, 0, sizeof(server_addr));
+		server_addr.sin_family = AF_INET;
+		server_addr.sin_addr.s_addr = inet_addr(hostname);
+		server_addr.sin_port = htons(__port);
+		ret = sendto(sock, msg, sizeof(msg), 0, (struct sockaddr *) &server_addr,
+				sizeof(server_addr));
+
+		if (-1 != ret) {
+			int maxlen = 1024;
+			unsigned long buf[maxlen];
+			struct sockaddr saddr;
+
+			socklen_t saddr_l = sizeof(saddr);
+			ret = recvfrom(sock, buf, 48, 0, &saddr, &saddr_l);
+			if (-1 != ret) {
+				long tmit;
+				tmit = ntohl((time_t) buf[4]);
+				tmit -= 2208988800U;
+				std::cout << "npt server time is " << std::put_time(std::localtime(&tmit), "%c %Z") << std::endl;
+				auto tdiff = time(0) - tmit;
+				if (0 != tdiff){
+					ret = stime(&tmit);
+					if (-1 == ret) {
+						str_error = std::strerror(errno);
+					}
+				} else {
+					ret = 1;
+				}
+			} else {
+				str_error = std::strerror(errno);
+			}
+		} else {
+			str_error = std::strerror(errno);
+		}
+	} else {
+		str_error = std::strerror(errno);
+	}
+ return ret;
+}
+
+int dns_lookup(const char *host, sockaddr_in *out, std::string& str_error)
+{
+    struct addrinfo *result;
+    int ret = getaddrinfo(host, "ntp", NULL, &result);
+	if (0 == ret) {
+		for (struct addrinfo *p = result; p; p = p->ai_next) {
+			if (p->ai_family != AF_INET)
+				continue;
+
+			memcpy(out, p->ai_addr, sizeof(*out));
+		}
+	} else {
+		str_error = std::strerror(errno);
+	}
+
+    freeaddrinfo(result);
+    return ret;
+}
+
 unsigned long long combine(unsigned int low, unsigned int high) {
 	return (((unsigned long long) high) << 32) | ((unsigned long long) low);
 }
@@ -23,7 +96,77 @@ unsigned int high(unsigned long long combined) {
 }
 
 unsigned int low(unsigned long long combined) {
-	unsigned long long mask = numeric_limits<unsigned int>::max();
+	int ntpdatesync(const std::string &host_url, int port, std::string& str_error) {
+	int ret = 0;
+	struct protoent *proto;
+	int sock;
+
+	proto = getprotobyname("udp");
+	ret = sock = socket(PF_INET, SOCK_DGRAM, proto->p_proto);
+	if (-1 != ret) {
+		struct sockaddr_in server_addr;
+		int __port = port;         //NTP is port 123
+		char *hostname = (char *) host_url.data();
+		unsigned char msg[48] = { 010, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+		memset(&server_addr, 0, sizeof(server_addr));
+		server_addr.sin_family = AF_INET;
+		server_addr.sin_addr.s_addr = inet_addr(hostname);
+		server_addr.sin_port = htons(__port);
+		ret = sendto(sock, msg, sizeof(msg), 0, (struct sockaddr *) &server_addr,
+				sizeof(server_addr));
+
+		if (-1 != ret) {
+			int maxlen = 1024;
+			unsigned long buf[maxlen];
+			struct sockaddr saddr;
+
+			socklen_t saddr_l = sizeof(saddr);
+			ret = recvfrom(sock, buf, 48, 0, &saddr, &saddr_l);
+			if (-1 != ret) {
+				long tmit;
+				tmit = ntohl((time_t) buf[4]);
+				tmit -= 2208988800U;
+				std::cout << "npt server time is " << std::put_time(std::localtime(&tmit), "%c %Z") << std::endl;
+				auto tdiff = time(0) - tmit;
+				if (0 != tdiff){
+					ret = stime(&tmit);
+					if (-1 == ret) {
+						str_error = std::strerror(errno);
+					}
+				} else {
+					ret = 1;
+				}
+			} else {
+				str_error = std::strerror(errno);
+			}
+		} else {
+			str_error = std::strerror(errno);
+		}
+	} else {
+		str_error = std::strerror(errno);
+	}
+ return ret;
+}
+
+int dns_lookup(const char *host, sockaddr_in *out, std::string& str_error)
+{
+    struct addrinfo *result;
+    int ret = getaddrinfo(host, "ntp", NULL, &result);
+	if (0 == ret) {
+		for (struct addrinfo *p = result; p; p = p->ai_next) {
+			if (p->ai_family != AF_INET)
+				continue;
+
+			memcpy(out, p->ai_addr, sizeof(*out));
+		}
+	} else {
+		str_error = std::strerror(errno);
+	}
+
+    freeaddrinfo(result);
+    return ret;
+}unsigned long long mask = numeric_limits<unsigned int>::max();
 	return mask & combined;
 }
 
@@ -1569,6 +1712,34 @@ void* memcpy_s(void *__restrict dest, size_t offset, const void *__restrict src,
 }
 
 int main() {
+
+	std::string error;
+	sockaddr_in addr_in;
+	int port = 123;
+	int i = 0;
+
+	std::string host = "0.pool.ntp.org";
+
+	i = dns_lookup(host.c_str(), &addr_in, error);
+	if (0 == i) {
+		char buffer[INET_ADDRSTRLEN];
+		inet_ntop( AF_INET, &addr_in.sin_addr, buffer, sizeof(buffer));
+
+		std::cout << "addr: " << buffer << " port: " << addr_in.sin_port << std::endl;
+		int i = ntpdatesync(buffer, port, error);
+		if (0 == i) {
+			std::cout << "system time has been synchronized with ntp server"
+					<< std::endl;
+		} else if (1 == i) {
+			std::cout << "system time is synchronized with ntp server"
+					<< std::endl;
+		} else {
+			std::cout << "ntpdate error: " << error << std::endl;
+		}
+	} else {
+		std::cout << "dns_lookup error: " << error << std::endl;
+	}
+		
 	vector <int> vertices;
 	vector < pair <int,int> > edges;
 	load_graph_from_file("kargerMinCut.txt", &vertices, &edges);
